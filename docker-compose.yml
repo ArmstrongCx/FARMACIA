@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_farmacia
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: sas
+      MYSQL_USER: farmacia_user
+      MYSQL_PASSWORD: 123456
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - farmacia-net
+
+  app:
+    build: .
+    container_name: gestion_farmacia_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/sas
+      SPRING_DATASOURCE_USERNAME: farmacia_user
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+    networks:
+      - farmacia-net
+    restart: on-failure
+
+volumes:
+  db-data:
+
+networks:
+  farmacia-net:
+    driver: bridge
